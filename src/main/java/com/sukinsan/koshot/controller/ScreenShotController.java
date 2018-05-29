@@ -36,13 +36,13 @@ public class ScreenShotController {
         String secret = securityUtil.getSecret(fileName, timestamp);
 
         ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentRequestUri();
-        builder
+        String url = builder
                 .uri(URI.create("api/screenshot"))
                 .replaceQueryParam("sc", secret)
                 .replaceQueryParam("fn", fileName)
-                .replaceQueryParam("ts", timestamp);
+                .replaceQueryParam("ts", timestamp).build().toString().replaceFirst("//","");
 
-        return new ResponseEntity(new PublishResponse(builder.build().toString()), HttpStatus.OK);
+        return new ResponseEntity(new PublishResponse(url), HttpStatus.OK);
     }
 
     @GetMapping(value = "/screenshot", produces = MediaType.IMAGE_JPEG_VALUE)
