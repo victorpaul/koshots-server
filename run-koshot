@@ -1,0 +1,2 @@
+#!/bin/sh
+sudo java -jar target/koshotserver-service.jar --server.port=80

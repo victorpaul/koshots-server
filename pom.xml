@@ -6,12 +6,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.sukinsan</groupId>
-    <artifactId>koshot</artifactId>
+    <artifactId>koshotserver</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>koshot</name>
-    <description>Server for screenshots</description>
+    <name>koshot server</name>
+    <description>Server for storing images</description>
 
     <parent>
         <groupId>org.springframework.boot</groupId>

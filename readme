@@ -1,0 +1,30 @@
+How to install it as service on ubuntu
+
+sudo gedit /etc/systemd/system/koshot.service
+
+##paste it into file
+
+[Unit]
+Description=Koshot Java REST Service
+[Service]
+User=root
+# The configuration file application.properties should be here:
+#change this to your workspace
+WorkingDirectory=/home/victor/java/koshots-server
+#path to executable.
+#executable is a bash script which calls jarfile
+ExecStart=/home/victor/java/koshots-server/run-koshot
+SuccessExitStatus=143
+TimeoutStopSec=10
+Restart=on-failure
+RestartSec=5
+[Install]
+WantedBy=multi-user.target
+
+sudo chmod u+x run-koshot
+
+
+sudo systemctl daemon-reload
+sudo systemctl enable koshot.service
+sudo systemctl start koshot
+sudo systemctl status koshot
