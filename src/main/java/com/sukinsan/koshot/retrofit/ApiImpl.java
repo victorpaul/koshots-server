@@ -28,7 +28,11 @@ public class ApiImpl implements Api {
     }
 
     @Override
-    public Response<RedmineUserResponse> redmineLoginBaseAuth(String auth) throws IOException {
-        return getRedmineService().login(auth).execute();
+    public RedmineUserResponse redmineLoginBaseAuth(String auth) throws IOException {
+        Response<RedmineUserResponse> resp = getRedmineService().login(auth).execute();
+        if(resp.isSuccessful()){
+            return resp.body();
+        }
+        return null;
     }
 }

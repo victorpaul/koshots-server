@@ -15,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import retrofit2.Response;
 
 import java.io.*;
 import java.net.URI;
@@ -38,7 +37,7 @@ public class ShotsController {
     public ResponseEntity publish(@RequestParam("file") MultipartFile file) throws IOException {
         long timestamp = System.currentTimeMillis();
         String fileName = timestamp + "_" + file.getOriginalFilename();
-        File newFile = new File(getUploadFolder(), fileName);
+        File newFile = securityUtil.getFile(fileName);
         newFile.createNewFile();
         file.transferTo(newFile);
 
@@ -64,7 +63,7 @@ public class ShotsController {
 
         String generateSecret = securityUtil.getSecret(fileName, timeStamp);
         if (generateSecret.equals(secret)) {
-            File outFile = new File(getUploadFolder(), fileName);
+            File outFile = securityUtil.getFile(fileName);
             if (outFile.exists()) {
                 InputStream in = new FileInputStream(outFile);
                 return StreamUtils.copyToByteArray(in);
@@ -75,12 +74,12 @@ public class ShotsController {
 
     @PostMapping("/shot")
     public ResponseEntity publishot(@RequestParam("file") MultipartFile file, @RequestHeader("Authorization") String auth) throws IOException {
-        Response<RedmineUserResponse> resp = api.redmineLoginBaseAuth(auth);
-        if (resp.isSuccessful()) {
-            long userID = resp.body().getUser().getId();
+        RedmineUserResponse resp = api.redmineLoginBaseAuth(auth);
+        if (resp != null) {
+            long userID = resp.getUser().getId();
             long timestamp = System.currentTimeMillis();
             String fileName = "id" + userID + "_" + timestamp + "_" + new Random().nextInt(1000) + "_" + file.getOriginalFilename();
-            File newFile = new File(getUploadFolder(), fileName);
+            File newFile = securityUtil.getFile(fileName);
             newFile.createNewFile();
             file.transferTo(newFile);
             return new ResponseEntity(new ShotEntity(fileName, getPublicUrl(fileName, timestamp)), HttpStatus.OK);
@@ -92,10 +91,10 @@ public class ShotsController {
     @GetMapping("/shot/{filename}")
     public @ResponseBody
     byte[] getShot(@PathVariable("filename") String fileName, @RequestHeader("Authorization") String auth) throws IOException {
-        Response<RedmineUserResponse> resp = api.redmineLoginBaseAuth(auth);
-        if (resp.isSuccessful() && isMyFile(resp, fileName)) {
+        RedmineUserResponse resp = api.redmineLoginBaseAuth(auth);
+        if (resp != null && securityUtil.isMyFile(resp, fileName)) {
 
-            File outFile = new File(getUploadFolder(), fileName);
+            File outFile = securityUtil.getFile(fileName);
             if (outFile.exists()) {
                 InputStream in = new FileInputStream(outFile);
                 return StreamUtils.copyToByteArray(in);
@@ -104,10 +103,36 @@ public class ShotsController {
         return StreamUtils.copyToByteArray(getClass().getClassLoader().getResourceAsStream("mona.jpg"));
     }
 
+    @GetMapping("/shot/{filename}/publicurl")
+    public ResponseEntity getShotUrl(@PathVariable("filename") String fileName, @RequestHeader("Authorization") String auth) throws IOException {
+        RedmineUserResponse resp = api.redmineLoginBaseAuth(auth);
+        if (resp != null && securityUtil.isMyFile(resp, fileName)) {
+            String url = getPublicUrl(fileName, System.currentTimeMillis());
+            return new ResponseEntity(new ShotEntity(fileName, url), HttpStatus.OK);
+        }
+        return new ResponseEntity(new MessageResponse("nope"), HttpStatus.UNAUTHORIZED);
+    }
+
+    @GetMapping("/shots")
+    public ResponseEntity getShots(@RequestHeader("Authorization") String auth) throws IOException {
+        RedmineUserResponse resp = api.redmineLoginBaseAuth(auth);
+        if (resp != null) {
+            List<ShotEntity> fileDatas = new ArrayList<>();
+            String fileNames[] = securityUtil.getUploadFolder().list((dir, name) -> securityUtil.isMyFile(resp, name));
+            if (fileNames != null) {
+                for (String fileName : fileNames) {
+                    fileDatas.add(new ShotEntity(fileName, getPublicUrl(fileName, System.currentTimeMillis())));
+                }
+            }
+            return new ResponseEntity(new ShotsResponse(fileDatas), HttpStatus.OK);
+        }
+        return new ResponseEntity(new MessageResponse("nope"), HttpStatus.UNAUTHORIZED);
+    }
+
     @DeleteMapping("/shot/{filename}")
     public ResponseEntity deleteShot(@PathVariable("filename") String fileName, @RequestHeader("Authorization") String auth) throws IOException {
-        Response<RedmineUserResponse> resp = api.redmineLoginBaseAuth(auth);
-        if (resp.isSuccessful() && isMyFile(resp, fileName)) {
+        RedmineUserResponse resp = api.redmineLoginBaseAuth(auth);
+        if (resp != null && securityUtil.isMyFile(resp, fileName)) {
 
             String deleteMessages[] = {
                     "Bloody kill",
@@ -118,50 +143,12 @@ public class ShotsController {
                     "Whyyyyyy..... khhhh....",
                     "Why did ya do this...."};
             String message = deleteMessages[new Random().nextInt(deleteMessages.length)];
-            File outFile = new File(getUploadFolder(), fileName);
+            File outFile = securityUtil.getFile(fileName);
             outFile.delete();
             return new ResponseEntity(new MessageResponse(message), HttpStatus.OK);
 
         }
         return new ResponseEntity(new MessageResponse("nope"), HttpStatus.UNAUTHORIZED);
-    }
-
-    @GetMapping("/shot/{filename}/publicurl")
-    public ResponseEntity getShotUrl(@PathVariable("filename") String fileName, @RequestHeader("Authorization") String auth) throws IOException {
-        Response<RedmineUserResponse> resp = api.redmineLoginBaseAuth(auth);
-        if (resp.isSuccessful() && isMyFile(resp, fileName)) {
-            String url = getPublicUrl(fileName, System.currentTimeMillis());
-            return new ResponseEntity(new ShotEntity(fileName, url), HttpStatus.OK);
-        }
-        return new ResponseEntity(new MessageResponse("nope"), HttpStatus.UNAUTHORIZED);
-    }
-
-    @GetMapping("/shots")
-    public ResponseEntity getShots(@RequestHeader("Authorization") String auth) throws IOException {
-        Response<RedmineUserResponse> resp = api.redmineLoginBaseAuth(auth);
-        if (resp.isSuccessful()) {
-
-            String fileNames[] = getUploadFolder().list((dir, name) -> isMyFile(resp, name));
-            List<ShotEntity> fileDatas = new ArrayList<>();
-            for (String fileName : fileNames) {
-                fileDatas.add(new ShotEntity(fileName, getPublicUrl(fileName, System.currentTimeMillis())));
-            }
-            return new ResponseEntity(new ShotsResponse(fileDatas), HttpStatus.OK);
-        }
-        return new ResponseEntity(new MessageResponse("nope"), HttpStatus.UNAUTHORIZED);
-    }
-
-    private File getUploadFolder() {
-        File uploadFOlder = new File(System.getProperty("user.home"), "koshot/uploads");
-        if (!uploadFOlder.exists()) {
-            uploadFOlder.mkdirs();
-        }
-        return uploadFOlder;
-    }
-
-    private boolean isMyFile(Response<RedmineUserResponse> resp, String fileName) {
-        long userID = resp.body().getUser().getId();
-        return fileName.startsWith("id" + userID + "_");
     }
 
     private String getPublicUrl(String fileName, long timestamp) {
