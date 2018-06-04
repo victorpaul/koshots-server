@@ -1,9 +1,9 @@
 package com.sukinsan.koshot.response;
 
-public class PublishResponse {
+public class PublishHttpResponse {
     private String url;
 
-    public PublishResponse(String http) {
+    public PublishHttpResponse(String http) {
         this.url = http;
     }
 

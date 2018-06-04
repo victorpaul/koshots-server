@@ -4,6 +4,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class SecurityUtilImpl implements SecurityUtil {
+
     @Override
     public String md5(String text) {
         MessageDigest md = null;

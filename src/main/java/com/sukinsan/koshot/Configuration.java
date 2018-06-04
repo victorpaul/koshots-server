@@ -1,5 +1,7 @@
 package com.sukinsan.koshot;
 
+import com.sukinsan.koshot.retrofit.Api;
+import com.sukinsan.koshot.retrofit.ApiImpl;
 import com.sukinsan.koshot.util.SecurityUtil;
 import com.sukinsan.koshot.util.SecurityUtilImpl;
 import org.springframework.context.annotation.Bean;
@@ -15,6 +17,11 @@ public class Configuration {
     @Bean
     public SecurityUtil provideSecurityUtil() {
         return new SecurityUtilImpl();
+    }
+
+    @Bean
+    public Api provideApi() {
+        return new ApiImpl();
     }
 
     @Bean
