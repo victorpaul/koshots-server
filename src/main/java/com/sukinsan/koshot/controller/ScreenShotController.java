@@ -40,7 +40,7 @@ public class ScreenShotController {
                 .uri(URI.create("api/screenshot"))
                 .replaceQueryParam("sc", secret)
                 .replaceQueryParam("fn", fileName)
-                .replaceQueryParam("ts", timestamp).build().toString().replaceFirst("//","");
+                .replaceQueryParam("ts", timestamp).build().toString().replaceFirst("//","http://");
 
         return new ResponseEntity(new PublishResponse(url), HttpStatus.OK);
     }
