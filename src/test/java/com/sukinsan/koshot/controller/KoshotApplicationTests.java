@@ -5,7 +5,6 @@ import com.sukinsan.koshot.entity.RedmineUserEntity;
 import com.sukinsan.koshot.response.RedmineUserResponse;
 import com.sukinsan.koshot.retrofit.Api;
 import com.sukinsan.koshot.util.SecurityUtil;
-import com.sukinsan.koshot.util.SecurityUtilImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,8 +17,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
-import java.io.File;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -106,6 +103,23 @@ public class KoshotApplicationTests {
     }
 
     @Test
+    public void get_public_url() throws Exception {
+        when(mockApi.redmineLoginBaseAuth("qwe")).thenReturn(successLoginResponse);
+        when(securityUtil.isMyFile(successLoginResponse,"name1")).thenReturn(true);
+        when(securityUtil.getFile("name1")).thenCallRealMethod();
+        mockMvc.perform(get("/api/shot/name1/publicurl").header("Authorization", "qwe"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void fail_to_get_public_url() throws Exception {
+        when(mockApi.redmineLoginBaseAuth("qwe")).thenReturn(successLoginResponse);
+        when(securityUtil.isMyFile(successLoginResponse,"name1")).thenReturn(false);
+        mockMvc.perform(get("/api/shot/name1/publicurl").header("Authorization", "qwe"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     public void check_get_shots() throws Exception {
         when(mockApi.redmineLoginBaseAuth("qwe")).thenReturn(successLoginResponse);
         when(securityUtil.getUploadFolder()).thenCallRealMethod();
@@ -120,7 +134,7 @@ public class KoshotApplicationTests {
         when(securityUtil.isMyFile(successLoginResponse, "name1")).thenReturn(true);
         when(securityUtil.getFile("name1")).thenCallRealMethod();
         mockMvc.perform(delete("/api/shot/name1").header("Authorization", "qwe"))
-                .andExpect(status().isOk());
+                .andExpect(status().isNotFound());
     }
 
     @Test

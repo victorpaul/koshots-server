@@ -45,7 +45,7 @@ OK 200
         "publicUrl": "http://....."
     }
     
-UNAUTHORIZED 401 
+UNAUTHORIZED 401,404 
 
     {
         "message": "error messsage"
@@ -90,7 +90,7 @@ OK 200
         "message": "Why did ya do this...."
     }
     
-UNAUTHORIZED 401 
+UNAUTHORIZED 401,404
 
     {
         "message": "error messsage"

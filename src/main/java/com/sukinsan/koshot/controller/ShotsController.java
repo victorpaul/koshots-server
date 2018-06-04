@@ -107,6 +107,10 @@ public class ShotsController {
     public ResponseEntity getShotUrl(@PathVariable("filename") String fileName, @RequestHeader("Authorization") String auth) throws IOException {
         RedmineUserResponse resp = api.redmineLoginBaseAuth(auth);
         if (resp != null && securityUtil.isMyFile(resp, fileName)) {
+            if (!securityUtil.getFile(fileName).exists()) {
+                return new ResponseEntity(new MessageResponse("oops"), HttpStatus.NOT_FOUND);
+            }
+
             String url = getPublicUrl(fileName, System.currentTimeMillis());
             return new ResponseEntity(new ShotEntity(fileName, url), HttpStatus.OK);
         }
@@ -133,6 +137,11 @@ public class ShotsController {
     public ResponseEntity deleteShot(@PathVariable("filename") String fileName, @RequestHeader("Authorization") String auth) throws IOException {
         RedmineUserResponse resp = api.redmineLoginBaseAuth(auth);
         if (resp != null && securityUtil.isMyFile(resp, fileName)) {
+            File outFile = securityUtil.getFile(fileName);
+            if (!outFile.exists()) {
+                return new ResponseEntity(new MessageResponse("oops"), HttpStatus.NOT_FOUND);
+            }
+            outFile.delete();
 
             String deleteMessages[] = {
                     "Bloody kill",
@@ -141,10 +150,8 @@ public class ShotsController {
                     "You are monster",
                     "He was so young",
                     "Whyyyyyy..... khhhh....",
-                    "Why did ya do this...."};
+                    "Why did ya do dis to me ): "};
             String message = deleteMessages[new Random().nextInt(deleteMessages.length)];
-            File outFile = securityUtil.getFile(fileName);
-            outFile.delete();
             return new ResponseEntity(new MessageResponse(message), HttpStatus.OK);
 
         }
