@@ -1,4 +1,4 @@
-package com.sukinsan.koshot.controller;
+package com.sukinsan.koshot.response;
 
 
 import com.sukinsan.koshot.entity.ShotEntity;

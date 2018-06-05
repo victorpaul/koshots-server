@@ -2,7 +2,7 @@ package com.sukinsan.koshot.controller;
 
 import com.sukinsan.koshot.response.MessageResponse;
 import com.sukinsan.koshot.entity.ShotEntity;
-import com.sukinsan.koshot.response.PublishHttpResponse;
+import com.sukinsan.koshot.response.ShotsResponse;
 import com.sukinsan.koshot.retrofit.Api;
 import com.sukinsan.koshot.response.RedmineUserResponse;
 import com.sukinsan.koshot.util.SecurityUtil;
@@ -32,26 +32,26 @@ public class ShotsController {
     @Autowired
     private Api api;
 
-    @Deprecated
-    @PostMapping("/publish")
-    public ResponseEntity publish(@RequestParam("file") MultipartFile file) throws IOException {
-        long timestamp = System.currentTimeMillis();
-        String fileName = timestamp + "_" + file.getOriginalFilename();
-        File newFile = securityUtil.getFile(fileName);
-        newFile.createNewFile();
-        file.transferTo(newFile);
-
-        String secret = securityUtil.getSecret(fileName, timestamp);
-
-        ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentRequestUri();
-        String url = builder
-                .uri(URI.create("api/screenshot"))
-                .replaceQueryParam("sc", secret)
-                .replaceQueryParam("fn", fileName)
-                .replaceQueryParam("ts", timestamp).build().toString().replaceFirst("//", "http://");
-
-        return new ResponseEntity(new PublishHttpResponse(url), HttpStatus.OK);
-    }
+//    @Deprecated
+//    @PostMapping("/publish")
+//    public ResponseEntity publish(@RequestParam("file") MultipartFile file) throws IOException {
+//        long timestamp = System.currentTimeMillis();
+//        String fileName = timestamp + "_" + file.getOriginalFilename();
+//        File newFile = securityUtil.getFile(fileName);
+//        newFile.createNewFile();
+//        file.transferTo(newFile);
+//
+//        String secret = securityUtil.getSecret(fileName, timestamp);
+//
+//        ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentRequestUri();
+//        String url = builder
+//                .uri(URI.create("api/screenshot"))
+//                .replaceQueryParam("sc", secret)
+//                .replaceQueryParam("fn", fileName)
+//                .replaceQueryParam("ts", timestamp).build().toString().replaceFirst("//", "http://");
+//
+//        return new ResponseEntity(new PublishHttpResponse(url), HttpStatus.OK);
+//    }
 
     @GetMapping(value = "/screenshot", produces = MediaType.IMAGE_JPEG_VALUE)
     public @ResponseBody
