@@ -95,3 +95,14 @@ UNAUTHORIZED 401,404
     {
         "message": "error messsage"
     }
+    
+    
+##Response 400 could be like this for all requests
+
+    {
+        "timestamp": "2018-06-05T07:07:51.584+0000",
+        "status": 400,
+        "error": "Bad Request",
+        "message": "Missing request header 'Authorization' for method parameter of type String",
+        "path": "/api/shot/name1"
+    }
