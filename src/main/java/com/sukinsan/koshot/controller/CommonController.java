@@ -12,4 +12,5 @@ public class CommonController {
     public ResponseEntity ping() {
         return new ResponseEntity("pong", HttpStatus.OK);
     }
+
 }
