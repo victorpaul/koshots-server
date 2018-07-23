@@ -28,3 +28,17 @@ sudo systemctl daemon-reload
 sudo systemctl enable koshot.service
 sudo systemctl start koshot
 sudo systemctl status koshot
+
+
+Docker and AWS Elastic Container Service
+
+docker build -t server-koshot .
+docker run -p 8080:8080  server-koshot
+docker tag server-koshot <my acc id>.dkr.ecr.us-east-1.amazonaws.com/server-koshot
+aws ecr get-login --no-include-email
+//execute command you've got as response from previous command
+
+docker push <my acc id>.dkr.ecr.us-east-1.amazonaws.com/server-koshot
+
+go to aws set up new
+Elastic Container Service > Task Definitions
