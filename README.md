@@ -1,4 +1,4 @@
-#Project moved to https://gitlab.com/victorpaul/koshots-server
+Project moved to https://gitlab.com/victorpaul/koshots-server
 
 Here is tiny spring server. You can upload image there, get link on it and share it with someone you want.
 
